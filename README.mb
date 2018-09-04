@@ -1,0 +1,25 @@
+# trade
+A small trade algorithm, taker over a year many cash flow (here crypto currencies, raw materials, stock exchange and forex). Principally work with the bollinger band, the aim is the maximization of profits according to the fluctuation of several simultaneous courses and their evolutions.
+
+BollingerShell:
+Real time shell to show bollinger bands, buy or sell currencies, etc.
+./BollingerShell to use it
+type expl at anytime for quick start
+
+command:
+quit
+compute
+graphicalcurve
+newpath
+newsdcoef
+newperiod
+allinput
+help
+resettoken
+pull
+buy
+sell
+
+OneYearAlgo
+The algorithm with currencies over a year.
+cd server &&./main.py | ../test_client/trade | ../server/main.py to start it
