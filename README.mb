@@ -1,6 +1,6 @@
 # trade
 A small trade algorithm, taker over a year many cash flow (here crypto currencies, raw materials, stock exchange and forex). Principally work with the bollinger band, the aim is the maximization of profits according to the fluctuation of several simultaneous courses and their evolutions.
-
+The second is a shell that allow you to show at any time the bollinger bands, to buy or sell currencies, change parameters of the bollinger band, etc.
 BollingerShell:
 Real time shell to show bollinger bands, buy or sell currencies, etc.
 ./BollingerShell to use it
