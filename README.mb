@@ -20,6 +20,8 @@ pull
 buy
 sell
 
-OneYearAlgo
+--------------------------------------------------------------------------
+
+OneYearAlgo:
 The algorithm with currencies over a year.
 cd server &&./main.py | ../test_client/trade | ../server/main.py to start it
