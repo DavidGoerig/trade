@@ -1,0 +1,443 @@
+#!/usr/bin/python3
+
+import os.path
+from sys import *
+from math import *
+import matplotlib.pyplot as plt
+
+#######################################################
+#       Check si la variable est bien un float
+#######################################################
+
+def     isfloat(value):
+    try:
+        float(value)
+        return True
+    except:
+        return False
+
+#######################################################
+#       Check si la variable est bien un int
+#######################################################
+    
+def     isint(value):
+    try:
+        int(value)
+        return True
+    except:
+        return False
+
+#######################################################
+#       Calculer la moyenne mobile sur une periode
+#######################################################
+    
+def     moving_average_on_period(floatlist, period, index):
+    if (isint(period) == False):
+        print("Periode pas un int")
+        return False
+    count = 0
+    summ = 0
+    while (count < int(period)):
+        count = count + 1
+        summ = summ + floatlist[index]
+        index = index - 1
+    total = summ / int(period)
+    return (total) ## TOTAL = MA( MOVING AVERAGE)
+
+#######################################################
+#       Calculer la deviation standard
+#######################################################
+
+def     standard_deviation(floatlist, period, MA, index):
+    count = 0
+    summ = 0
+    while (count < int(period)):
+        count = count + 1
+        summ = summ + ((floatlist[index] - MA)**2)
+        index = index - 1
+    total = summ / int(period)
+    total = sqrt(total)
+    return (total)
+
+#######################################################
+#       calcul de la bande superieure et inferieure
+#       MA = mobile average SD = standard deviation sdc = standart deviation coef
+#       BU = band upper BL = band lower
+#######################################################
+
+def     calc_band(floatlist, period, MA, SD, SDC):
+    if (isfloat(SDC) == False):
+        print("Coefficiant is not float")
+        return False, False
+    BU = float(MA) + (float(SD) * float(SDC))
+    BL = float(MA) - (float(SD) * float(SDC))
+    return BU, BL
+
+
+#######################################################
+#       affichage resultat
+#######################################################
+
+def     print_it(MA, SD, BU, BL):
+    print("\nOUTPUT")
+    print("MA: %.2f" % MA)
+    print("SD: %.2f" % SD)
+    print("B+: %.2f" % BU)
+    print("B-: %.2f" % BL)
+
+#######################################################
+#       affichage courbe de base
+#######################################################
+
+def     print_curve_base(floatlist, BU, BL):
+    bandu = []
+    bandl = []
+    for val in floatlist:
+        bandu.append(val + BU)
+        bandl.append(val + BL)
+    plt.plot(bandu)
+    plt.plot(bandl)
+    plt.plot(floatlist)
+    plt.show()
+
+
+#######################################################
+#       print help
+#######################################################
+
+def     printhelp():
+    print("TRADE\nYou don't need any argument. ")
+
+#######################################################
+#       affichage input
+#######################################################
+
+def     print_input(INDEX, PERIOD, SDCOEF, PATH):
+    print("INPUT")
+    print("Path: %s" % PATH)
+    print("Index: %d" % INDEX)
+    print("Period: %d" % PERIOD)
+    print("SD_coef: %.2f" % SDCOEF)
+    
+#######################################################
+#       main fonction
+#######################################################
+#argv1 = fichier arv2 = periof argv3 = coef
+def     launch_bollinger(PATH, INDEX, PERIOD, SDCOEF):
+    with open(PATH, 'r') as f:
+        content = f.readlines()
+
+    content = [x.strip() for x in content]
+    floatlist = []
+    
+    for line in content:
+        if isfloat(line) == True:
+            floatlist.append(float(line))
+        else:
+            print("Erreur dans le fichier")
+            return 84
+
+    if INDEX - PERIOD < 0 or INDEX > len(floatlist):
+        print("Wrong index")
+        return 84
+    MA = moving_average_on_period(floatlist, PERIOD, INDEX)
+    if (MA == False):
+        return (84)
+    SD = standard_deviation(floatlist, PERIOD, MA, INDEX)
+    BU, BL = calc_band(floatlist, PERIOD, MA, SD, SDCOEF)
+    if (BU == False or BL == False):
+        return 84
+    print_it(MA, SD, BU, BL)
+    return 0
+
+#######################################################
+#       test the arg
+#######################################################
+
+def     canCompute(PATH, INDEX, PERIOD, SDCOEF):
+    with open(PATH, 'r') as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    floatlist = []
+    for line in content:
+        if isfloat(line) == True:
+            floatlist.append(float(line))
+        else:
+            print("Erreur dans le fichier")
+            return False
+    if INDEX - PERIOD < 0 or INDEX > len(floatlist):
+        print("Wrong index")
+        return False
+    MA = moving_average_on_period(floatlist, PERIOD, INDEX)
+    if (MA == False):
+        print("Moving average on period error.")
+        return False
+    SD = standard_deviation(floatlist, PERIOD, MA, INDEX)
+    BU, BL = calc_band(floatlist, PERIOD, MA, SD, SDCOEF)
+    if (BU == False or BL == False):
+        return False
+    return True
+
+#######################################################
+#       Parse argument
+#######################################################
+
+def isPath(pathf):
+    if os.path.isfile(pathf) and os.access(pathf, os.R_OK):
+        return True
+    return False
+
+#######################################################
+#       user enter path
+#######################################################
+
+def getPath():
+    PATH = False
+    while (PATH == False or isPath(PATH) == False):
+        line = input("Enter the PATH please : ")
+        if (line == "quit"):
+            exit (0)
+        PATH = "./" + line
+    return PATH
+
+#######################################################
+#       user enter sdcoef
+#######################################################
+
+def getSdcoef():
+    SDCOEF = False
+    while (SDCOEF == False or isfloat(SDCOEF) == False):
+        line = input("Enter the SDCOEF please : ")
+        if (line == "quit"):
+            exit (0)
+        if (isfloat(SDCOEF) == True):
+            SDCOEF = float(line)
+    return SDCOEF
+
+#######################################################
+#       user enter index
+#######################################################
+
+def getIndex():
+    INDEX = False
+    while (INDEX == False or isint(INDEX) == False):
+        line = input("Enter the INDEX please : ")
+        if (line == "quit"):
+            exit (0)
+        if (isint(INDEX) == True):
+            INDEX = int(line)
+    return INDEX
+
+#######################################################
+#       user enter period
+#######################################################
+
+def getPeriod():
+    PERIOD = False
+    while (PERIOD == False or isint(PERIOD) == False):
+        line = input("Enter the PERIOD please : ")
+        if (line == "quit"):
+            exit (0)
+        if (isint(PERIOD) == True):
+            PERIOD = int(line)
+    return PERIOD
+
+#######################################################
+#       print all command
+#######################################################
+
+def print_help_command():
+    print("The command are:")
+    print("\tquit")
+    print("\tcompute")
+    print("\tgraphicalcurve")
+    print("\tnewpath")
+    print("\tnewsdcoef")
+    print("\tnewindex")
+    print("\tnewperiod")
+    print("\tallinput")
+    print("\thelp")
+    print("\tlogin")
+    print("\treset token")
+    print("\tpull")
+    print("\tbuy")
+    print("\tsell")
+
+#######################################################
+#       set variables for example
+#######################################################
+    
+def setForExample():
+    PATH = "./ressources/bollinger_bitcoin_dec2017"
+    SDCOEF = 1.5
+    PERIOD = 2
+    INDEX = 10
+    return PATH, SDCOEF, PERIOD, INDEX
+
+#######################################################
+#       first initialisation of parameters
+#######################################################
+
+def initVariable(PATH, SDCOEF, INDEX, PERIOD):
+    PATH = getPath()
+    print()
+    SDCOEF = getSdcoef()
+    print()
+    INDEX = getIndex()
+    print()
+    PERIOD = getPeriod()
+    print()
+    print("Ok fine your input are:")
+    print_input(INDEX, PERIOD, SDCOEF, PATH)
+    print()
+    print("Yet you can use all the follow command.")
+    print_help_command()
+    print()
+    return PATH, SDCOEF, PERIOD, INDEX
+
+#######################################################
+#       affichage courbe de base
+#######################################################
+
+def     print_curve(floatlist, BU, BL):
+    plt.plot(BU)
+    plt.plot(BL)
+    plt.plot(floatlist)
+    plt.show()
+    
+#######################################################
+#       print_it
+#######################################################
+
+def     launch_graphical(PATH, PERIOD, SDCOEF):
+    with open(PATH, 'r') as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    floatlist = []
+    for line in content:
+        if isfloat(line) == True:
+            floatlist.append(float(line))
+        else:
+            print("Erreur dans le fichier")
+            return 84
+    BU = []
+    BL = []
+    INDEX = 0
+    while (INDEX < len(floatlist)):
+        if INDEX - PERIOD < 0:
+            BU.append(floatlist[INDEX])
+            BL.append(floatlist[INDEX])
+        else:
+            MA = moving_average_on_period(floatlist, PERIOD, INDEX)
+            if (MA == False):
+                return (84)
+            SD = standard_deviation(floatlist, PERIOD, MA, INDEX)
+            BUP, BLO = calc_band(floatlist, PERIOD, MA, SD, SDCOEF)
+            if (BU == False or BL == False):
+                return 84
+            BU.append(BUP)
+            BL.append(BLO)
+        INDEX = INDEX + 1
+    print_curve(floatlist, BU, BL)
+
+#######################################################
+#       cmd login
+#######################################################
+    
+def login():
+    print("Waiting for server!")
+
+#######################################################
+#       cmd reset token
+#######################################################
+    
+def reset_token():
+    print("Waiting for server!")
+
+#######################################################
+#       cmd pull
+#######################################################
+    
+def pull():
+    print("Waiting for server!")
+
+#######################################################
+#       cmd buy
+#######################################################
+    
+def buy():
+    print("Waiting for server!")
+
+#######################################################
+#       cmd sell
+#######################################################
+    
+def sell():
+    print("Waiting for server!")
+
+#######################################################
+#       parse user input in the shell
+#######################################################
+    
+def parseCmd(PATH, SDCOEF, INDEX, PERIOD):
+    line = input("\nWhat do you want to do?\n> ")
+    if (line == "quit"):
+        exit (0)
+    if (line == "compute"):
+        if (canCompute(PATH, INDEX, PERIOD, SDCOEF) == True):
+            launch_bollinger(PATH, INDEX, PERIOD, SDCOEF)
+        else:
+            print ("Change your arguments.")
+    if (line == "newpath"):
+        PATH = getPath()
+    if (line == "newsdcoef"):
+        SDCOEF = getSdcoef()
+    if (line == "newindex"):
+        INDEX = getIndex()
+    if (line == "newperiod"):
+        PERIOD = getPeriod()
+    if (line == "expl"):
+        PATH, SDCOEF, PERIOD, INDEX = setForExample()
+    if (line == "allinput"):
+        print_input(INDEX, PERIOD, SDCOEF, PATH)
+    if (line == "login"):
+        login()
+    if (line == "reset token"):
+        reset_token()
+    if (line == "pull"):
+        pull()
+    if (line == "buy"):
+        buy()
+    if (line == "sell"):
+        sell()
+    if (line == "help"):
+        print_help_command()
+    if (line == "graphicalcurve"):
+        launch_graphical(PATH, PERIOD, SDCOEF)
+    return PATH, SDCOEF, PERIOD, INDEX
+
+#######################################################
+#       run the prog
+#######################################################
+
+def run_it():
+    PATH = False
+    SDCOEF = False
+    INDEX = False
+    PERIOD = False    
+    if len(argv) != 1:
+        printhelp()
+        return 84
+    print("Hey first you need to give the PATH, set first SDCOEF, then the INDEX and then the PERIOD please.\nIf you type quit at anytime it quit")
+    PATH, SDCOEF, PERIOD, INDEX = initVariable(PATH, SDCOEF, INDEX, PERIOD)
+    while (1):
+        PATH, SDCOEF, PERIOD, INDEX = parseCmd(PATH, SDCOEF, INDEX, PERIOD)
+    return 0
+
+#######################################################
+#       norme
+#######################################################
+
+if __name__ == "__main__":
+    ret = run_it()
+    exit(ret)

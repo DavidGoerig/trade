@@ -1,0 +1,1 @@
+Juste faire un affichage avec une courbe puis pouvoir choisir dans un menu contextuel (entrée text ou bien jsute des barres) pour pouvoir changer la période

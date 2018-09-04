@@ -1,0 +1,5 @@
+Pour lancer le push des indexs et lancer son algo
+cd push_index && ./main.py && ../test_client/main.py
+
+Pareil mais avec le server
+cd push_index && ./main.py && ../test_client/main.py | ../server/main.py
